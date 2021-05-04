@@ -54,7 +54,9 @@ covidph.plot=(x,y)=>{
         x: x||[1, 2, 3, 4, 5, 6],
         y: y||[4, 3, 2, 5, 3, 4]
     };
-    covidph.Plotly.newPlot(div, [trace]);
+    covidph.Plotly.newPlot(div, [trace],{
+        title:Date()
+    });
     return div;
 }
 
