@@ -1,4 +1,4 @@
-console.log('covidph.js loaded')
+console.log('covidph.js loaded');
 
 covidph={
     date:Date()
@@ -29,7 +29,38 @@ covidph.getData = async (url='https://data.cdc.gov/resource/muzy-jte6.json?$limi
     return covidph.data
 }
 
+covidph.getScript=async (url="https://cdn.plot.ly/plotly-latest.min.js")=>{
+    return new Promise((resolve,reject)=>{
+        console.log('loading ',url)
+        let s = document.createElement('script')
+        s.src=url
+        s.onload=resolve
+        s.onerror=reject
+        document.head.appendChild(s)
+    });
+}
+
+(async()=>{
+    await covidph.getScript("https://cdn.plot.ly/plotly-latest.min.js")
+    if(typeof(Plotly)!='undefined'){
+        //console.log('type:',typeof(Plotly));
+        covidph.Plotly=Plotly
+    }  
+})()
+
+covidph.plot=(x,y)=>{
+    let div = document.createElement('div');
+    let trace = {
+        x: x||[1, 2, 3, 4, 5, 6],
+        y: y||[4, 3, 2, 5, 3, 4]
+    };
+    covidph.Plotly.newPlot(div, [trace]);
+    return div;
+}
 
 if(typeof(define)!='undefined'){
-    define(covidph)
+    define(["https://cdn.plot.ly/plotly-latest.min.js"],function(Plotly){
+        covidph.Plotly=Plotly
+        return covidph
+    })
 }
