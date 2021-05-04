@@ -48,14 +48,39 @@ covidph.getScript=async (url="https://cdn.plot.ly/plotly-latest.min.js")=>{
     }  
 })()
 
-covidph.plot=(x,y)=>{
+covidph.plotTime=(x,y,title)=>{
     let div = document.createElement('div');
     let trace = {
         x: x||[1, 2, 3, 4, 5, 6],
-        y: y||[4, 3, 2, 5, 3, 4]
+        y: y||[4, 3, 2, 5, 3, 4],
+        mode: 'lines+markers',
+        marker: {
+            color: 'rgba(17, 157, 255,0)',
+            //size: 60,
+            line: {
+              color: 'navy',
+              width: 1
+            }
+        },
+        line: {
+            //color:'lightblue'
+            color:'rgba(100,100,100,0.2)'
+        }
+
     };
     covidph.Plotly.newPlot(div, [trace],{
-        title:Date()
+        title:`<span style="font-size:small">${title||Date()}</span>`,
+        xaxis:{
+            showline: true,
+            mirror: 'ticks',
+            //autotick: true,
+        },
+        yaxis:{
+            title:'weekly mortality',
+            showline: true,
+            mirror: 'ticks',
+            //autotick: true,
+        }
     });
     return div;
 }
