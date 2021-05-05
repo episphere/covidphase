@@ -48,11 +48,17 @@ covidph.getScript=async (url="https://cdn.plot.ly/plotly-latest.min.js")=>{
     }  
 })()
 
-covidph.plotTime=(x,y,title)=>{
+covidph.plotTime=async(state,parm="covid_19_u071_underlying_cause_of_death")=>{
     let div = document.createElement('div');
+    if(!covidph.data){
+        await covidph.getData()
+    }
+    let loc = state||"United States"
+    let xx = covidph.data.filter((x) => x.jurisdiction_of_occurrence == loc);
+
     let trace = {
-        x: x||[1, 2, 3, 4, 5, 6],
-        y: y||[4, 3, 2, 5, 3, 4],
+        x: xx.map((x) => x.week_ending_date),
+        y: xx.map((x) => x[parm]),
         mode: 'lines+markers',
         marker: {
             color: 'rgba(17, 157, 255,0)',
@@ -69,7 +75,7 @@ covidph.plotTime=(x,y,title)=>{
 
     };
     covidph.Plotly.newPlot(div, [trace],{
-        title:`<span style="font-size:small">${title||Date()}</span>`,
+        title:`${loc}<br><span style="font-size:small">${parm}</span>`,
         xaxis:{
             showline: true,
             mirror: 'ticks',
