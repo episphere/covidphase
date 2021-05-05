@@ -16,16 +16,13 @@ covidph.getData = async (url='https://data.cdc.gov/resource/muzy-jte6.json?$limi
     covidph.data = await (await fetch(url)).json()
     //let dparm="week_ending_date"
     let parms=covidph.pop(Object.keys(covidph.data[0]),["jurisdiction_of_occurrence","week_ending_date"])
-
-
     covidph.data=covidph.data.map(x=>{
         parms.forEach(p=>{
             x[p]=parseInt(x[p])
         })
         x.week_ending_date=new Date(x.week_ending_date) // put date parm back
         return x
-    })
-    
+    })   
     return covidph.data
 }
 
@@ -48,8 +45,8 @@ covidph.getScript=async (url="https://cdn.plot.ly/plotly-latest.min.js")=>{
     }  
 })()
 
-covidph.plotTime=async(state,parm="covid_19_u071_underlying_cause_of_death")=>{
-    let div = document.createElement('div');
+covidph.plotTime=async(state,selector,parm="covid_19_u071_underlying_cause_of_death",div)=>{
+    div = div||document.createElement('div');
     if(!covidph.data){
         await covidph.getData()
     }
@@ -85,9 +82,27 @@ covidph.plotTime=async(state,parm="covid_19_u071_underlying_cause_of_death")=>{
             title:'weekly mortality',
             showline: true,
             mirror: 'ticks',
+            rangemode:'tozero'
             //autotick: true,
         }
     });
+    if(!state||selector){
+        var sel = document.createElement('select')
+        div.prepend(sel)
+        var states = [... new Set(covidph.data.map(x=>x.jurisdiction_of_occurrence))]
+        states.forEach(st=>{
+            let opt = document.createElement('option')
+            opt.value=opt.textContent=st
+            sel.appendChild(opt)
+        })
+        if(state){sel.value=state}
+        sel.onchange=_=>{
+            //div.innerHTML=""
+            delete div.querySelector('.plot-container')
+            covidph.plotTime(sel.value,true,parm,div)
+            sel.remove()
+        }
+    }
     return div;
 }
 
