@@ -106,6 +106,61 @@ covidph.plotTime=async(state,selector,parm="covid_19_u071_underlying_cause_of_de
     return div;
 }
 
+covidph.sum=(x)=>{
+	if(Array.isArray(x[0])){return x.map(function(xi){return jmat.sum(xi)})}
+	else{return x.reduce(function(a,b){return a+b})};
+}
+
+covidph.interp1=(X,Y,XI)=>{ // linear interpolation, remember X is supposed to be sorted
+	var n = X.length;
+	var YI = XI.map(function(XIi){
+		var i=covidph.sum(X.map(function(Xi){if (Xi<XIi){return 1}else{return 0}}));
+		if (i==0){return Y[0]} // lower bound
+		else if (i==n){return Y[n-1]} // upper bound
+		else{return (Y[i-1]+(XIi-X[i-1])*(Y[i]-Y[i-1])/(X[i]-X[i-1]))}
+	});
+	return YI
+}
+
+covidph.transpose=(x)=>{ // transposes 2D array
+	if(!Array.isArray(x[0])){y=[x]}  // in case x is a 1D Array
+	else{
+		var y=[],n=x.length,m=x[0].length;
+		for(var j=0;j<m;j++){
+			y[j]=[];
+			for(var i=0;i<n;i++){
+				y[j][i]=x[i][j];
+			}
+		}
+	}
+	return y
+}
+
+covidph.sort=(x)=>{ // [y,I]=sort(x), where y is the sorted array and I contains the indexes
+	x=x.map(function(xi,i){return [xi,i]});
+	x.sort(function(a,b){return a[0]-b[0]});	
+	return covidph.transpose(x)
+}
+
+covidph.trim=(dst)=>{
+    
+}
+
+covidph.memb=(x,dst)=>{ // builds membership function
+	var n = x.length-1;
+	if(!dst){
+		dst = covidph.sort(x);
+		Ind=dst[1];
+		dst[1]=dst[1].map(function(z,i){return i/(n)});
+		var y = x.map(function(z,i){return dst[1][Ind[i]]});
+		return dst;
+	}
+	else{ // interpolate y from distributions, dst
+		var y = covidph.interp1(dst[0],dst[1],x);
+		return y;
+	}	
+}
+
 if(typeof(define)!='undefined'){
     define(["https://cdn.plot.ly/plotly-latest.min.js"],function(Plotly){
         covidph.Plotly=Plotly
